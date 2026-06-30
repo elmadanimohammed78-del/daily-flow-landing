@@ -638,7 +638,7 @@ footer{
       <p id="comment-success" style="display:none;font-family:JetBrains Mono,monospace;font-size:13px;color:var(--teal);margin-bottom:24px">✓ Thanks! Your comment has been submitted.</p>
 
       <div id="comments-list" style="display:flex;flex-direction:column;gap:14px">
-        <p style="font-size:13px;color:var(--dim);text-align:center;font-family:JetBrains Mono,monospace">No comments yet — be the first.</p>
+        <p id="comments-loading" style="font-size:13px;color:var(--dim);text-align:center;font-family:JetBrains Mono,monospace">Loading comments…</p>
       </div>
     </div>
   </div>
@@ -795,6 +795,52 @@ var observer=new IntersectionObserver(function(entries){
 reveals.forEach(function(r){observer.observe(r);});
 
 // ── WAITLIST ──
+// ── LOAD APPROVED COMMENTS ──
+var SHEET_URL='https://script.google.com/macros/s/AKfycbzN3mv77rtexjZoc9HYyzvv7gC4Lst_G05BloOxBkjOsIyn6NstXd84TUZK1q3df1tR/exec';
+
+function loadComments(){
+  var list=document.getElementById('comments-list');
+  fetch(SHEET_URL,{method:'GET',mode:'no-cors'})
+    .then(function(){
+      // no-cors means we can't read the response body
+      // So we use a JSONP-style approach instead
+    }).catch(function(){});
+
+  // Use a script tag approach to bypass CORS
+  var script=document.createElement('script');
+  script.src=SHEET_URL+'?callback=renderComments';
+  document.head.appendChild(script);
+}
+
+function renderComments(data){
+  var list=document.getElementById('comments-list');
+  if(!data||data.length===0){
+    list.innerHTML='<p style="font-size:13px;color:var(--dim);text-align:center;font-family:JetBrains Mono,monospace">No comments yet — be the first.</p>';
+    return;
+  }
+  list.innerHTML='';
+  data.forEach(function(item){
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;position:relative';
+    var d=new Date(item.timestamp);
+    var dateStr=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    card.innerHTML='<div style="font-size:14px;color:var(--sub);line-height:1.75;margin-bottom:14px;font-style:italic">&#8220;'+escHtml(item.comment)+'&#8221;</div>'
+      +'<div style="font-size:12px;font-weight:600;color:var(--text)">'+escHtml(item.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--dim);font-family:JetBrains Mono,monospace;margin-top:2px">'+dateStr+'</div>';
+    list.appendChild(card);
+  });
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Load comments on page load
+window.addEventListener('load',function(){
+  // Give the page 500ms to settle, then load comments
+  setTimeout(loadComments, 500);
+});
+
 // ── REGIONAL PRICING (Morocco = free) ──
 fetch('https://ipapi.co/json/')
   .then(function(res){return res.json();})
