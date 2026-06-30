@@ -620,28 +620,25 @@ footer{
   </div>
 </section>
 
-<!-- QUOTES -->
+<!-- COMMENTS -->
 <section class="why-section">
   <div class="section-inner">
     <div class="reveal" style="text-align:center">
-      <span class="section-label">Early feedback</span>
-      <h2>What beta users say</h2>
+      <span class="section-label">Community</span>
+      <h2>What people are saying</h2>
+      <p style="color:var(--sub);font-size:15px;max-width:480px;margin:16px auto 0;line-height:1.7">Real comments from real visitors. Be the first to share your thoughts.</p>
     </div>
-    <div class="quotes-grid">
-      <div class="quote-card reveal">
-        <p class="quote-text">I used to reconstruct my day from memory every evening. Daily Flow means my timesheet writes itself.</p>
-        <div class="quote-author">Sarah K.</div>
-        <div class="quote-role">Freelance consultant, London</div>
-      </div>
-      <div class="quote-card reveal">
-        <p class="quote-text">The automatic switching is the killer feature. I have 15 context switches a day — finally they're all captured.</p>
-        <div class="quote-author">Rami A.</div>
-        <div class="quote-role">Product manager, Dubai</div>
-      </div>
-      <div class="quote-card reveal">
-        <p class="quote-text">Sent the PDF to a client after our first session. They asked what tool I used. It looked more polished than our own reports.</p>
-        <div class="quote-author">Léa M.</div>
-        <div class="quote-role">UX researcher, Paris</div>
+
+    <div style="max-width:560px;margin:48px auto 0">
+      <form id="comment-form" onsubmit="handleComment(event)" style="display:flex;flex-direction:column;gap:12px;margin-bottom:40px">
+        <input class="waitlist-input" type="text" placeholder="Your name" required id="cm-name" style="width:100%"/>
+        <textarea class="waitlist-input" placeholder="What do you think of Daily Flow?" required id="cm-text" rows="3" style="width:100%;resize:vertical;font-family:Inter,sans-serif"></textarea>
+        <button class="waitlist-btn" type="submit" style="align-self:flex-start">Post comment →</button>
+      </form>
+      <p id="comment-success" style="display:none;font-family:JetBrains Mono,monospace;font-size:13px;color:var(--teal);margin-bottom:24px">✓ Thanks! Your comment has been submitted.</p>
+
+      <div id="comments-list" style="display:flex;flex-direction:column;gap:14px">
+        <p style="font-size:13px;color:var(--dim);text-align:center;font-family:JetBrains Mono,monospace">No comments yet — be the first.</p>
       </div>
     </div>
   </div>
@@ -653,9 +650,9 @@ footer{
     <span class="section-label">Pricing</span>
     <h2>Pay once.<br/><em>Yours forever.</em></h2>
     <div class="pricing-card">
-      <span class="pricing-badge">Early access — limited spots</span>
-      <div class="pricing-price"><span>$</span>0</div>
-      <div class="pricing-period">free during beta</div>
+      <span class="pricing-badge" id="pricing-badge">Early access — limited spots</span>
+      <div class="pricing-price" id="pricing-price"><span>£</span>8</div>
+      <div class="pricing-period" id="pricing-period">one-time payment · no subscription · ever</div>
       <ul class="pricing-features">
         <li>Unlimited tasks and sessions</li>
         <li>PDF, Excel, CSV, HTML exports</li>
@@ -663,7 +660,7 @@ footer{
         <li>5 languages, dark + light mode</li>
         <li>Install to home screen (PWA)</li>
       </ul>
-      <a href="#waitlist" class="btn-primary" style="display:block;text-align:center">Claim your free spot →</a>
+      <a href="#waitlist" class="btn-primary" style="display:block;text-align:center" id="pricing-cta">Claim your free spot →</a>
     </div>
   </div>
 </section>
@@ -798,6 +795,25 @@ var observer=new IntersectionObserver(function(entries){
 reveals.forEach(function(r){observer.observe(r);});
 
 // ── WAITLIST ──
+// ── REGIONAL PRICING (Morocco = free) ──
+fetch('https://ipapi.co/json/')
+  .then(function(res){return res.json();})
+  .then(function(data){
+    if(data && data.country_code === 'MA'){
+      var badge=document.getElementById('pricing-badge');
+      var price=document.getElementById('pricing-price');
+      var period=document.getElementById('pricing-period');
+      var cta=document.getElementById('pricing-cta');
+      if(badge)badge.textContent='Free for Morocco 🇲🇦';
+      if(price)price.innerHTML='<span>£</span>0';
+      if(period)period.textContent='free for users in Morocco — forever';
+      if(cta)cta.textContent='Get it free →';
+    }
+  })
+  .catch(function(err){
+    console.log('Geolocation check skipped:',err);
+  });
+
 function handleWaitlist(e){
   e.preventDefault();
   var email=document.getElementById('wl-email').value;
@@ -822,6 +838,35 @@ function handleWaitlist(e){
     btn.disabled=false;
     alert('Something went wrong — please try again.');
     console.error('Waitlist error:',err);
+  });
+}
+
+function handleComment(e){
+  e.preventDefault();
+  var name=document.getElementById('cm-name').value.trim();
+  var text=document.getElementById('cm-text').value.trim();
+  if(!name||!text)return;
+
+  var btn=document.querySelector('#comment-form button[type="submit"]');
+  var originalText=btn.textContent;
+  btn.textContent='Posting...';
+  btn.disabled=true;
+
+  var SHEET_URL='https://script.google.com/macros/s/AKfycbzN3mv77rtexjZoc9HYyzvv7gC4Lst_G05BloOxBkjOsIyn6NstXd84TUZK1q3df1tR/exec';
+
+  fetch(SHEET_URL,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'type=comment&name='+encodeURIComponent(name)+'&comment='+encodeURIComponent(text)
+  }).then(function(){
+    document.getElementById('comment-form').style.display='none';
+    document.getElementById('comment-success').style.display='block';
+  }).catch(function(err){
+    btn.textContent=originalText;
+    btn.disabled=false;
+    alert('Something went wrong — please try again.');
+    console.error('Comment error:',err);
   });
 }
 </script>
