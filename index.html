@@ -476,7 +476,7 @@ footer{
   <h1>Stop timing.<br/><em>Start flowing.</em></h1>
   <p class="hero-sub">Daily Flow switches tasks automatically as you work — no manual timers, no forgotten clocks. Just type what you're doing and let the app handle the rest.</p>
   <div class="hero-actions">
-    <a href="#waitlist" class="btn-primary">Get early access →</a>
+    <a href="#waitlist" class="btn-primary" id="hero-cta">Get early access →</a>
     <a href="#how" class="btn-ghost">See how it works ↓</a>
   </div>
   <p class="hero-note">Free during beta · £8 one-time at launch · No subscription</p>
@@ -842,6 +842,12 @@ window.addEventListener('load',function(){
 });
 
 // ── REGIONAL PRICING (Morocco = free) ──
+// Set default £8 Gumroad link for everyone
+var ctaBtn=document.getElementById('pricing-cta');
+var heroBtn=document.getElementById('hero-cta');
+if(ctaBtn)ctaBtn.href='https://payhip.com/b/pE57L';
+if(heroBtn)heroBtn.href='https://payhip.com/b/pE57L';
+
 fetch('https://ipapi.co/json/')
   .then(function(res){return res.json();})
   .then(function(data){
@@ -850,10 +856,20 @@ fetch('https://ipapi.co/json/')
       var price=document.getElementById('pricing-price');
       var period=document.getElementById('pricing-period');
       var cta=document.getElementById('pricing-cta');
+      var hero=document.getElementById('hero-cta');
       if(badge)badge.textContent='Free for Morocco 🇲🇦';
       if(price)price.innerHTML='<span>£</span>0';
-      if(period)period.textContent='free for users in Morocco — forever';
-      if(cta)cta.textContent='Get it free →';
+      if(period)period.textContent='Free forever for users in Morocco';
+      if(cta){
+        cta.textContent='Download free →';
+        cta.href='https://raw.githubusercontent.com/elmadanimohammed78-del/daily-flow-landing/main/task-tracker.html';
+        cta.download='daily-flow.html';
+      }
+      if(hero){
+        hero.textContent='Download free →';
+        hero.href='https://raw.githubusercontent.com/elmadanimohammed78-del/daily-flow-landing/main/task-tracker.html';
+        hero.download='daily-flow.html';
+      }
     }
   })
   .catch(function(err){
