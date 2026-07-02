@@ -1349,7 +1349,8 @@ function expHTML(data){
     +'<h2 style="font-size:16px;font-weight:700;margin-bottom:12px">Task Log</h2>'
     +'<table class="tsk"><thead><tr><th>#</th><th>Task</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +gantt
-    +'<button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div></body></html>';
+    +'<button class="pbtn" onclick="window.print()">🖨 Print / Save as PDF</button></div>
+</body></html>';
 
   var w=window.open('','_blank');
   if(w){w.document.write(reportHTML);w.document.close();}
@@ -1595,11 +1596,86 @@ if('serviceWorker' in navigator){
 }
 
 // ═══════════════════════════════════════════════════════
+// INSTALL POPUP
+// ═══════════════════════════════════════════════════════
+function showInstallPopup(){
+  // Only show if not already installed and not dismissed before
+  if(localStorage.getItem('df_install_shown')) return;
+  // Don't show if already running as PWA
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  if(window.navigator.standalone) return;
+  document.getElementById('install-popup').style.display='flex';
+}
+
+function dismissInstall(){
+  localStorage.setItem('df_install_shown','1');
+  document.getElementById('install-popup').style.display='none';
+}
+
+// Show install popup after 8 seconds (let user see the app first)
+setTimeout(showInstallPopup, 8000);
+
+// ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
 initSettings();
 render();
 renderHist();
 </script>
+
+<!-- INSTALL POPUP -->
+<div id="install-popup" style="display:none">
+  <div class="install-sheet">
+    <div class="install-handle"></div>
+    <div class="install-title">📲 Add Daily Flow to your home screen</div>
+    <div class="install-sub">Install it like a native app — works offline, opens instantly, no app store needed.</div>
+    <div class="install-steps">
+      <div class="install-step">
+        <span class="install-os">iPhone</span>
+        <div class="install-txt">
+          <strong>Tap the Share button → "Add to Home Screen"</strong>
+          <span>In Safari, tap the Share icon at the bottom of the screen, then tap "Add to Home Screen" and confirm.</span>
+        </div>
+      </div>
+      <div class="install-step">
+        <span class="install-os">Android</span>
+        <div class="install-txt">
+          <strong>Tap the menu → "Add to Home Screen"</strong>
+          <span>In Chrome, tap the 3-dot menu (⋮) at the top right, then tap "Add to Home screen" and confirm.</span>
+        </div>
+      </div>
+    </div>
+    <button class="install-dismiss" onclick="dismissInstall()">Got it — install now</button>
+    <button class="install-skip" onclick="dismissInstall()">Skip for now</button>
+  </div>
+</div>
+
+
+<!-- INSTALL POPUP -->
+<div id="install-popup" style="display:none">
+  <div class="install-sheet">
+    <div class="install-handle"></div>
+    <div class="install-title">📲 Add Daily Flow to your home screen</div>
+    <div class="install-sub">Install it like a native app — works offline, opens instantly, no app store needed.</div>
+    <div class="install-steps">
+      <div class="install-step">
+        <span class="install-os">iPhone</span>
+        <div class="install-txt">
+          <strong>Tap the Share button then "Add to Home Screen"</strong>
+          <span>In Safari, tap the share icon at the bottom, then tap "Add to Home Screen" and confirm.</span>
+        </div>
+      </div>
+      <div class="install-step">
+        <span class="install-os">Android</span>
+        <div class="install-txt">
+          <strong>Tap the menu then "Add to Home Screen"</strong>
+          <span>In Chrome, tap the 3-dot menu at the top right, then tap "Add to Home screen" and confirm.</span>
+        </div>
+      </div>
+    </div>
+    <button class="install-dismiss" onclick="dismissInstall()">Got it — install now</button>
+    <button class="install-skip" onclick="dismissInstall()">Skip for now</button>
+  </div>
+</div>
 </body>
 </html>
