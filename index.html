@@ -394,33 +394,16 @@ h2 em{font-style:italic;color:var(--teal)}
 .pricing-features li:last-child{border-bottom:none}
 
 /* ── WAITLIST ── */
-.waitlist-section{padding:120px 24px;text-align:center}
+
 .waitlist-section h2{margin-bottom:12px}
 .waitlist-sub{font-size:16px;color:var(--sub);max-width:440px;margin:0 auto 40px;line-height:1.7}
-.waitlist-form{
-  display:flex;gap:10px;max-width:460px;margin:0 auto;
-  flex-wrap:wrap;justify-content:center;
-}
-.waitlist-input{
-  flex:1;min-width:220px;background:var(--card);
-  border:1.5px solid var(--border);border-radius:10px;
-  color:var(--text);font-family:Inter,sans-serif;font-size:15px;
-  padding:14px 18px;outline:none;transition:border-color .2s;
-}
+
+
 .waitlist-input::placeholder{color:var(--dim)}
 .waitlist-input:focus{border-color:var(--teal)}
-.waitlist-btn{
-  background:var(--teal);color:#071E24;
-  font-family:Inter,sans-serif;font-size:15px;font-weight:700;
-  padding:14px 28px;border-radius:10px;border:none;cursor:pointer;
-  box-shadow:0 0 28px rgba(13,202,214,.3);
-  transition:all .15s;white-space:nowrap;
-}
+
 .waitlist-btn:hover{box-shadow:0 0 44px rgba(13,202,214,.5);transform:translateY(-1px)}
-.waitlist-count{
-  font-family:JetBrains\ Mono,monospace;font-size:11px;
-  color:var(--dim);margin-top:16px;letter-spacing:.04em;
-}
+
 .waitlist-count strong{color:var(--teal)}
 #waitlist-success{
   display:none;font-family:JetBrains\ Mono,monospace;
@@ -475,7 +458,7 @@ footer{
     </svg>
     <span class="nav-wordmark">Daily <span>Flow</span></span>
   </a>
-  <a href="#waitlist" class="nav-cta">Join the waitlist</a>
+  <a href="https://payhip.com/b/pE57L" class="nav-cta">Get Daily Flow — £8 →</a>
 </nav>
 
 <!-- HERO -->
@@ -657,7 +640,7 @@ footer{
   <div class="section-inner reveal" style="text-align:center">
     <span class="section-label">Pricing</span>
     <h2>Pay once.<br/><em>Yours forever.</em></h2>
-    <div class="pricing-card" id="pricing-card-paid">
+    <div class="pricing-card">
       <span class="pricing-badge">Pay once · own it forever</span>
       <div class="pricing-price"><span>£</span>8</div>
       <div class="pricing-period">one-time payment · no subscription · ever</div>
@@ -669,53 +652,12 @@ footer{
         <li>Install to home screen (PWA)</li>
       </ul>
       <a href="https://payhip.com/b/pE57L" class="btn-primary" style="display:block;text-align:center" id="pricing-cta">Get access — £8 →</a>
-    </div>
 
-    <div class="pricing-card" id="pricing-card-free" style="display:none">
-      <span class="pricing-badge" style="background:rgba(13,202,214,.15);color:var(--teal);border-color:rgba(13,202,214,.4)">🇲🇦 Free for Morocco — forever</span>
-      <div class="pricing-price"><span style="font-size:22px;vertical-align:top;margin-top:10px;display:inline-block;color:var(--sub)"></span>Free</div>
-      <div class="pricing-period">no payment · no account · just download</div>
-      <ul class="pricing-features">
-        <li>Unlimited tasks and sessions</li>
-        <li>PDF, Excel, CSV, HTML exports</li>
-        <li>Gantt chart in every report</li>
-        <li>5 languages including Arabic</li>
-        <li>Install to home screen (PWA)</li>
-      </ul>
-      <a href="https://elmadanimohammed78-del.github.io/daily-flow-landing/app/" class="btn-primary" style="display:block;text-align:center;font-size:16px" id="pricing-cta-free">⬇ Download Free →</a>
-      <p style="font-size:12px;color:var(--sub);margin-top:14px;text-align:center;font-family:JetBrains Mono,monospace">Opens instantly in your browser · no app store needed</p>
     </div>
   </div>
 </section>
 
-<!-- WAITLIST -->
-<section class="waitlist-section" id="waitlist">
-  <div class="section-inner">
-    <span class="section-label" style="display:block;text-align:center;margin-bottom:16px">Join the waitlist</span>
-    <h2 style="text-align:center">£8 once.<br/><em>Yours forever.</em></h2>
-    <p class="waitlist-sub">Beta is free. When Daily Flow launches, waitlist members get the lifetime licence for <strong style="color:var(--teal)">£8 once</strong> — no subscription, no renewal, no catch.</p>
-    <form class="waitlist-form" onsubmit="handleWaitlist(event)">
-      <input class="waitlist-input" type="email" placeholder="your@email.com" required id="wl-email"/>
-      <button class="waitlist-btn" type="submit">Join free →</button>
-    </form>
-    <p class="waitlist-count" id="wl-count"><strong>47 people</strong> already on the list</p>
-    <div id="waitlist-success" style="display:none">
-  <p style="font-family:JetBrains Mono,monospace;font-size:14px;color:var(--teal);margin-bottom:16px">✓ You're on the list! We'll be in touch soon.</p>
-  <p style="font-size:13px;color:var(--sub);margin-bottom:16px">Help spread the word — share Daily Flow with one person who hates manual timesheets:</p>
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <a href="https://twitter.com/intent/tweet?text=Just%20joined%20the%20waitlist%20for%20Daily%20Flow%20%E2%80%94%20an%20automatic%20task%20timer%20that%20costs%20%C2%A38%20once%2C%20forever.%20No%20subscription.%20%F0%9F%94%A5&url=https%3A%2F%2Fdaily-flow-timer.netlify.app" target="_blank" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);text-decoration:none;font-size:13px;font-weight:500;transition:border-color .15s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
-      𝕏 Share on X
-    </a>
-    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fdaily-flow-timer.netlify.app" target="_blank" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);text-decoration:none;font-size:13px;font-weight:500;transition:border-color .15s" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
-      in Share on LinkedIn
-    </a>
-    <button onclick="navigator.clipboard.writeText('https://daily-flow-timer.netlify.app').then(function(){this.textContent='✓ Copied!'},function(){})" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:border-color .15s;font-family:Inter,sans-serif" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
-      🔗 Copy link
-    </button>
-  </div>
-</div>
-  </div>
-</section>
+
 
 <!-- FOOTER -->
 <footer>
@@ -864,61 +806,8 @@ window.addEventListener('load',function(){
   setTimeout(loadComments, 500);
 });
 
-// ── REGIONAL PRICING (Morocco = free) ──
-// Set default £8 Gumroad link for everyone
-fetch('https://ipapi.co/json/')
-  .then(function(res){return res.json();})
-  .then(function(data){
-    if(data && data.country_code === 'MA'){
-      // Show free card, hide paid card
-      var paid=document.getElementById('pricing-card-paid');
-      var free=document.getElementById('pricing-card-free');
-      if(paid) paid.style.display='none';
-      if(free) free.style.display='block';
-      // Update hero button
-      var hero=document.getElementById('hero-cta');
-      if(hero){
-        hero.textContent='Download Free →';
-        hero.href='https://elmadanimohammed78-del.github.io/daily-flow-landing/app/';
-      }
-      // Update waitlist section subtitle
-      var wsub=document.querySelector('.waitlist-sub');
-      if(wsub) wsub.innerHTML='Daily Flow is <strong style="color:var(--teal)">completely free</strong> for users in Morocco. Click Download Free to get it instantly.';
-      // Update waitlist heading
-      var wh2=document.querySelector('.waitlist-section h2');
-      if(wh2) wh2.innerHTML='Free for Morocco.<br/><em>Download now.</em>';
-    }
-  })
-  .catch(function(err){
-    console.log('Geolocation check skipped:',err);
-  });
+// Regional pricing handled via coupon code
 
-function handleWaitlist(e){
-  e.preventDefault();
-  var email=document.getElementById('wl-email').value;
-  var btn=document.querySelector('.waitlist-btn');
-  var originalText=btn.textContent;
-  btn.textContent='Joining...';
-  btn.disabled=true;
-
-  var SHEET_URL='https://script.google.com/macros/s/AKfycbzN3mv77rtexjZoc9HYyzvv7gC4Lst_G05BloOxBkjOsIyn6NstXd84TUZK1q3df1tR/exec';
-
-  fetch(SHEET_URL,{
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:'email='+encodeURIComponent(email)
-  }).then(function(){
-    document.querySelector('.waitlist-form').style.display='none';
-    document.getElementById('wl-count').style.display='none';
-    document.getElementById('waitlist-success').style.display='block';
-  }).catch(function(err){
-    btn.textContent=originalText;
-    btn.disabled=false;
-    alert('Something went wrong — please try again.');
-    console.error('Waitlist error:',err);
-  });
-}
 
 function handleComment(e){
   e.preventDefault();
