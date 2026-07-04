@@ -1495,11 +1495,14 @@ function dismissInstall(){
 }
 setTimeout(showInstallPopup,8000);
 
-// SERVICE WORKER
+// SERVICE WORKER - clear old caches
 if('serviceWorker' in navigator){
-  var swCode="const C='df3';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['.']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k))))));";
-  var swBlob=new Blob([swCode],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){r.unregister();});
+  });
+  caches.keys().then(function(keys){
+    keys.forEach(function(k){caches.delete(k);});
+  });
 }
 
 // INIT
