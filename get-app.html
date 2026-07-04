@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Getting Daily Flow...</title>
+<style>
+body{margin:0;background:#071E24;color:#F0EBE0;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;text-align:center;padding:24px}
+.spinner{width:40px;height:40px;border:3px solid rgba(13,202,214,.2);border-top-color:#0DCAD6;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+p{color:#8AABB0;font-size:15px}
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<p>Getting Daily Flow for you...</p>
+<script>
+fetch('https://ipapi.co/json/')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d && d.country_code==='MA'){
+      window.location.href='https://elmadanimohammed78-del.github.io/daily-flow-landing/app/';
+    } else {
+      window.location.href='https://payhip.com/b/pE57L';
+    }
+  })
+  .catch(function(){
+    // If check fails, send to landing page
+    window.location.href='https://elmadanimohammed78-del.github.io/daily-flow-landing/';
+  });
+</script>
+</body>
+</html>
