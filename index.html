@@ -476,7 +476,7 @@ footer{
   <h1>Stop timing.<br/><em>Start flowing.</em></h1>
   <p class="hero-sub">Daily Flow switches tasks automatically as you work — no manual timers, no forgotten clocks. Just type what you're doing and let the app handle the rest.</p>
   <div class="hero-actions">
-    <a href="#waitlist" class="btn-primary" id="hero-cta">Get early access →</a>
+    <a href="https://payhip.com/b/pE57L" class="btn-primary" id="hero-cta">Get early access →</a>
     <a href="#how" class="btn-ghost">See how it works ↓</a>
   </div>
   <p class="hero-note">Free during beta · £8 one-time at launch · No subscription</p>
@@ -649,10 +649,10 @@ footer{
   <div class="section-inner reveal" style="text-align:center">
     <span class="section-label">Pricing</span>
     <h2>Pay once.<br/><em>Yours forever.</em></h2>
-    <div class="pricing-card">
-      <span class="pricing-badge" id="pricing-badge">Early access — limited spots</span>
-      <div class="pricing-price" id="pricing-price"><span>£</span>8</div>
-      <div class="pricing-period" id="pricing-period">one-time payment · no subscription · ever</div>
+    <div class="pricing-card" id="pricing-card-paid">
+      <span class="pricing-badge">Pay once · own it forever</span>
+      <div class="pricing-price"><span>£</span>8</div>
+      <div class="pricing-period">one-time payment · no subscription · ever</div>
       <ul class="pricing-features">
         <li>Unlimited tasks and sessions</li>
         <li>PDF, Excel, CSV, HTML exports</li>
@@ -660,7 +660,22 @@ footer{
         <li>5 languages, dark + light mode</li>
         <li>Install to home screen (PWA)</li>
       </ul>
-      <a href="#waitlist" class="btn-primary" style="display:block;text-align:center" id="pricing-cta">Claim your free spot →</a>
+      <a href="https://payhip.com/b/pE57L" class="btn-primary" style="display:block;text-align:center" id="pricing-cta">Get access — £8 →</a>
+    </div>
+
+    <div class="pricing-card" id="pricing-card-free" style="display:none">
+      <span class="pricing-badge" style="background:rgba(13,202,214,.15);color:var(--teal);border-color:rgba(13,202,214,.4)">🇲🇦 Free for Morocco — forever</span>
+      <div class="pricing-price"><span style="font-size:22px;vertical-align:top;margin-top:10px;display:inline-block;color:var(--sub)"></span>Free</div>
+      <div class="pricing-period">no payment · no account · just download</div>
+      <ul class="pricing-features">
+        <li>Unlimited tasks and sessions</li>
+        <li>PDF, Excel, CSV, HTML exports</li>
+        <li>Gantt chart in every report</li>
+        <li>5 languages including Arabic</li>
+        <li>Install to home screen (PWA)</li>
+      </ul>
+      <a href="https://elmadanimohammed78-del.github.io/daily-flow-landing/app/" class="btn-primary" style="display:block;text-align:center;font-size:16px" id="pricing-cta-free">⬇ Download Free →</a>
+      <p style="font-size:12px;color:var(--sub);margin-top:14px;text-align:center;font-family:JetBrains Mono,monospace">Opens instantly in your browser · no app store needed</p>
     </div>
   </div>
 </section>
@@ -843,33 +858,27 @@ window.addEventListener('load',function(){
 
 // ── REGIONAL PRICING (Morocco = free) ──
 // Set default £8 Gumroad link for everyone
-var ctaBtn=document.getElementById('pricing-cta');
-var heroBtn=document.getElementById('hero-cta');
-if(ctaBtn)ctaBtn.href='https://payhip.com/b/pE57L';
-if(heroBtn)heroBtn.href='https://payhip.com/b/pE57L';
-
 fetch('https://ipapi.co/json/')
   .then(function(res){return res.json();})
   .then(function(data){
     if(data && data.country_code === 'MA'){
-      var badge=document.getElementById('pricing-badge');
-      var price=document.getElementById('pricing-price');
-      var period=document.getElementById('pricing-period');
-      var cta=document.getElementById('pricing-cta');
+      // Show free card, hide paid card
+      var paid=document.getElementById('pricing-card-paid');
+      var free=document.getElementById('pricing-card-free');
+      if(paid) paid.style.display='none';
+      if(free) free.style.display='block';
+      // Update hero button
       var hero=document.getElementById('hero-cta');
-      if(badge)badge.textContent='Free for Morocco 🇲🇦';
-      if(price)price.innerHTML='<span>£</span>0';
-      if(period)period.textContent='Free forever for users in Morocco';
-      if(cta){
-        cta.textContent='Download free →';
-        cta.href='https://raw.githubusercontent.com/elmadanimohammed78-del/daily-flow-landing/main/task-tracker.html';
-        cta.download='daily-flow.html';
-      }
       if(hero){
-        hero.textContent='Download free →';
-        hero.href='https://raw.githubusercontent.com/elmadanimohammed78-del/daily-flow-landing/main/task-tracker.html';
-        hero.download='daily-flow.html';
+        hero.textContent='Download Free →';
+        hero.href='https://elmadanimohammed78-del.github.io/daily-flow-landing/app/';
       }
+      // Update waitlist section subtitle
+      var wsub=document.querySelector('.waitlist-sub');
+      if(wsub) wsub.innerHTML='Daily Flow is <strong style="color:var(--teal)">completely free</strong> for users in Morocco. Click Download Free to get it instantly.';
+      // Update waitlist heading
+      var wh2=document.querySelector('.waitlist-section h2');
+      if(wh2) wh2.innerHTML='Free for Morocco.<br/><em>Download now.</em>';
     }
   })
   .catch(function(err){
