@@ -486,9 +486,13 @@ function esc(s){
   return r;
 }
 function dur(a,b){
-  var s=Math.round((new Date(b)-new Date(a))/1000);
+  var ms=new Date(b)-new Date(a);
+  if(ms<0) ms=0;
+  var s=Math.floor(ms/1000);
   var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
-  return h>0?h+'h '+m+'m':m>0?m+'m '+sc+'s':sc+'s';
+  if(h>0) return h+'h '+pad(m)+'m '+pad(sc)+'s';
+  if(m>0) return m+'m '+pad(sc)+'s';
+  return sc+'s';
 }
 function selCat(){
   var b=document.querySelector('.cb.sel');
@@ -508,14 +512,26 @@ function tick(){
 tick();
 setInterval(tick,1000);
 
-setInterval(function(){
+// Robust timer — survives browser throttling and tab switches
+function updateRunningTimer(){
   if(!tasks.length) return;
   var last=tasks[tasks.length-1];
   if(last.end||last.paused) return;
-  updStats();
   var rt=document.querySelector('.run-time');
   if(rt) rt.textContent=dur(last.start,new Date());
-},1000);
+  updStats();
+}
+setInterval(updateRunningTimer,500);
+
+// Re-sync when tab becomes visible again
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden) updateRunningTimer();
+});
+
+// Re-sync when window regains focus
+window.addEventListener('focus',function(){
+  updateRunningTimer();
+});
 
 // RENDER
 function render(){
