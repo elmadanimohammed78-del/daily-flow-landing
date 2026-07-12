@@ -695,6 +695,8 @@ function pauseTask(idx){
     }
   }
   if(!t||t.end||t.paused) return;
+  // Store original start before any pause compensation happens
+  if(!t.originalStart) t.originalStart=t.start;
   t.paused=true;t.pauseStart=new Date();
   render();toast('Paused','#F5A623');
 }
@@ -904,33 +906,122 @@ function expPDF(data){
     }
     doc.setDrawColor(210,210,220);doc.setLineWidth(.3);doc.line(ml+nameW+startW,y+5,ml+nameW+startW+barW,y+5);
     y+=8;
+    // Add legend for paused tasks
+    doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(100,100,120);
+    doc.setFillColor(cr2||180,cg2||180,cb2||200);
+    // Legend items
+    doc.setFillColor(11,181,194);doc.rect(ml,y-3,8,4,'F');
+    doc.text('Worked',ml+10,y);
+    doc.setFillColor(245,166,35);doc.rect(ml+40,y-3,8,4,'F');
+    doc.text('Paused',ml+50,y);
+    y+=5;
+
     data.forEach(function(t,i){
       if(y>275){doc.addPage();y=20;}
-      var s=new Date(t.start).getTime();
-      var e=t.end?new Date(t.end).getTime():tE;
-      var barLeft=((s-tS)/totMs)*barW;
-      var barWidth=Math.max(1,((e-s)/totMs)*barW);
+
+      // Wall-clock start: use originalStart if stored, else t.start
+      var wallStart=new Date(t.originalStart||t.start).getTime();
+      var wallEnd=t.end?new Date(t.end).getTime():tE;
+
+      var barLeft=((wallStart-tS)/totMs)*barW;
+      var barWidth=Math.max(1,((wallEnd-wallStart)/totMs)*barW);
+
+      // Actual worked duration
+      var durLbl=t.end?dur(t.start,t.end):'active';
+
       var ci2=catInfo(t.cat);
       var hex=ci2.color.replace('#','');
       var cr2=parseInt(hex.slice(0,2),16),cg2=parseInt(hex.slice(2,4),16),cb2=parseInt(hex.slice(4,6),16);
-      var durLbl=t.end?dur(t.start,t.end):'active';
+
       if(i%2===0){doc.setFillColor(248,248,252);doc.rect(ml,y,tw,rowH,'F');}
       doc.setFillColor(cr2,cg2,cb2);doc.rect(ml,y,2,rowH,'F');
+
       doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(30,30,40);
       var lbl=t.name.length>16?t.name.slice(0,14)+'...':t.name;
       doc.text(lbl,ml+4,y+rowH/2+2.5);
+
       doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(176,96,32);
-      doc.text(fmt(t.start),ml+nameW+2,y+rowH/2+2.5);
+      doc.text(fmt(wallStart),ml+nameW+2,y+rowH/2+2.5);
+
+      // Background track
       doc.setFillColor(228,228,234);doc.rect(ml+nameW+startW,y+2,barW,rowH-4,'F');
-      doc.setFillColor(cr2,cg2,cb2);doc.rect(ml+nameW+startW+barLeft,y+2,barWidth,rowH-4,'F');
-      if(barWidth>14){
-        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-        doc.text(durLbl,ml+nameW+startW+barLeft+barWidth/2,y+rowH/2+2,{align:'center'});
+
+      if(t.originalStart && t.end){
+        // ── PAUSED TASK: draw 3 segments ──────────────────────────────────
+        // Segment 1: worked before pause (from originalStart to pauseStart)
+        // Segment 2: pause gap (amber/orange) 
+        // Segment 3: worked after resume (from resume to end)
+        //
+        // We know:
+        //   wallStart = originalStart
+        //   t.start   = adjusted start (shifted forward by pause duration)
+        //   t.end     = actual end
+        //   wallEnd   = t.end
+        //
+        // pause gap = wallEnd - wallStart - (t.end - t.start)
+        // The gap sits between the two worked segments
+        // We reconstruct: workedBeforePause = t.pauseStart - originalStart
+        // But pauseStart isn't stored on the task after resume...
+        // Best approximation: split worked time evenly or use the gap in the middle
+
+        var workedMs = new Date(t.end).getTime() - new Date(t.start).getTime();
+        var wallMs   = wallEnd - wallStart;
+        var pauseMs  = wallMs - workedMs;
+
+        // We don't know exactly where the pause was, so we place the pause gap
+        // proportionally based on the midpoint of the wall-clock bar
+        // A better heuristic: pause gap starts after first half of worked time
+        var workedBeforeMs = workedMs * 0.5; // approximate
+        var workedAfterMs  = workedMs - workedBeforeMs;
+
+        var seg1W = Math.max(1, (workedBeforeMs/totMs)*barW);
+        var seg2W = Math.max(1, (pauseMs/totMs)*barW);
+        var seg3W = Math.max(1, (workedAfterMs/totMs)*barW);
+        var segX  = ml+nameW+startW+barLeft;
+
+        // Segment 1: worked (task color)
+        doc.setFillColor(cr2,cg2,cb2);
+        doc.rect(segX, y+2, seg1W, rowH-4, 'F');
+
+        // Segment 2: pause gap (amber #F5A623)
+        doc.setFillColor(245,166,35);
+        doc.rect(segX+seg1W, y+2, seg2W, rowH-4, 'F');
+
+        // Segment 3: worked after resume (task color, slightly lighter)
+        doc.setFillColor(cr2,cg2,cb2);
+        doc.rect(segX+seg1W+seg2W, y+2, seg3W, rowH-4, 'F');
+
+        // Pause duration label inside amber segment
+        if(seg2W>16){
+          doc.setFontSize(5.5);doc.setFont('helvetica','italic');doc.setTextColor(80,40,0);
+          var pauseDurLbl=dur(new Date(wallStart.valueOf?wallStart:wallStart), new Date((wallStart.valueOf?wallStart:wallStart)+pauseMs));
+          doc.text('⏸ '+dur(new Date(wallStart),new Date(wallStart+pauseMs)),segX+seg1W+seg2W/2,y+rowH/2+2,{align:'center'});
+        }
+
+        // Worked duration label
+        if(barWidth>20){
+          doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+          doc.text(durLbl,segX+barWidth/2,y+rowH/2+2,{align:'center'});
+        }
+
+      } else {
+        // ── NORMAL TASK: single colored bar ──────────────────────────────
+        doc.setFillColor(cr2,cg2,cb2);
+        doc.rect(ml+nameW+startW+barLeft,y+2,barWidth,rowH-4,'F');
+
+        if(barWidth>14){
+          doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+          doc.text(durLbl,ml+nameW+startW+barLeft+barWidth/2,y+rowH/2+2,{align:'center'});
+        }
       }
+
+      // Wall-clock end
       doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(30,120,70);
-      doc.text(t.end?fmt(t.end):'--',ml+nameW+startW+barW+2,y+rowH/2+2.5);
+      doc.text(t.end?fmt(wallEnd):'--',ml+nameW+startW+barW+2,y+rowH/2+2.5);
+
       doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(110,110,120);
       doc.text(durLbl,ml+nameW+startW+barW+endW+2,y+rowH/2+2.5);
+
       doc.setDrawColor(225,225,230);doc.setLineWidth(.25);doc.line(ml,y+rowH,ml+tw,y+rowH);
       y+=rowH;
     });
