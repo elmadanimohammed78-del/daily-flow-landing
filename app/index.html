@@ -650,10 +650,14 @@ document.addEventListener('DOMContentLoaded',function(){
       var name=inp.value.trim();
       if(!name) return;
       var now=new Date();
-      // Only auto-close the last task if it's actively running (not paused)
+      // Auto-stop any currently running task (not paused ones)
       if(tasks.length){
-        var last=tasks[tasks.length-1];
-        if(!last.end && !last.paused) last.end=now;
+        for(var ai=0;ai<tasks.length;ai++){
+          if(!tasks[ai].end && !tasks[ai].paused){
+            tasks[ai].end=now;
+            break;
+          }
+        }
       }
       tasks.push({name:name,cat:selCat(),note:'',start:now,end:null,paused:false,pauseStart:null});
       inp.value='';
@@ -827,6 +831,15 @@ function doExp(type){
 }
 
 function expPDF(data){
+  if(!window.jspdf){
+    toast('PDF library loading... try again in a moment','#F5A623');
+    // Try loading jsPDF dynamically if it failed
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=function(){toast('Ready! Tap PDF again','#0BB5C2');};
+    document.head.appendChild(s);
+    return;
+  }
   var J=window.jspdf;
   var doc=new J.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   var pw=doc.internal.pageSize.getWidth(),ml=14,mr=14,tw=pw-ml-mr;
