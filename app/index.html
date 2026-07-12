@@ -549,8 +549,10 @@ function render(){
 
   tasks.forEach(function(t,i){
     var isLast=i===tasks.length-1;
+    // A task is active if it's the last one and not ended and not paused
     var isAct=isLast&&!t.end&&!t.paused;
-    var isPaus=isLast&&!t.end&&t.paused;
+    // A task is paused if it has no end but is marked paused (can be any position)
+    var isPaus=!t.end&&t.paused;
     var isDone=!!t.end;
     var ci=catInfo(t.cat);
 
@@ -577,7 +579,8 @@ function render(){
     if(isAct){
       actions='<div class="cact"><button class="rbtn pause" onclick="event.stopPropagation();pauseTask()" title="Pause"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="1.5" y="0.5" width="3" height="10" rx="1"/><rect x="6.5" y="0.5" width="3" height="10" rx="1"/></svg></button><button class="rbtn stop" onclick="event.stopPropagation();stopTask()" title="Stop"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0.5" y="0.5" width="10" height="10" rx="2"/></svg></button></div>';
     } else if(isPaus){
-      actions='<div class="cact"><button class="rbtn resume" onclick="event.stopPropagation();resumeTask()" title="Resume"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M2 0.5l8 5-8 5z"/></svg></button><button class="rbtn stop" onclick="event.stopPropagation();stopTask()" title="Stop"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0.5" y="0.5" width="10" height="10" rx="2"/></svg></button></div>';
+      // Show resume button with the task index so any paused task can be resumed
+      actions='<div class="cact"><button class="rbtn resume" onclick="event.stopPropagation();resumeTaskAt('+i+')" title="Resume"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M2 0.5l8 5-8 5z"/></svg></button><button class="rbtn stop" onclick="event.stopPropagation();stopTaskAt('+i+')" title="Stop"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0.5" y="0.5" width="10" height="10" rx="2"/></svg></button></div>';
     } else {
       actions='<div class="cact"><div class="ddot"></div></div>';
     }
@@ -643,7 +646,11 @@ document.addEventListener('DOMContentLoaded',function(){
       var name=inp.value.trim();
       if(!name) return;
       var now=new Date();
-      if(tasks.length&&!tasks[tasks.length-1].end) tasks[tasks.length-1].end=now;
+      // Only auto-close the last task if it's actively running (not paused)
+      if(tasks.length){
+        var last=tasks[tasks.length-1];
+        if(!last.end && !last.paused) last.end=now;
+      }
       tasks.push({name:name,cat:selCat(),note:'',start:now,end:null,paused:false,pauseStart:null});
       inp.value='';
       render();
@@ -681,13 +688,41 @@ function pauseTask(){
   render();toast('Paused','#F5A623');
 }
 function resumeTask(){
-  if(!tasks.length) return;
-  var t=tasks[tasks.length-1];
-  if(!t.paused) return;
+  // Resume the last task (legacy)
+  resumeTaskAt(tasks.length-1);
+}
+function resumeTaskAt(i){
+  if(i<0||i>=tasks.length) return;
+  var t=tasks[i];
+  if(!t.paused||t.end) return;
+  // If another task is currently running, pause it first
+  var last=tasks[tasks.length-1];
+  if(i!==tasks.length-1&&!last.end&&!last.paused){
+    last.paused=true;last.pauseStart=new Date();
+  }
+  // Resume this task
   var elapsed=new Date()-new Date(t.pauseStart);
   t.start=new Date(new Date(t.start).getTime()+elapsed);
   t.paused=false;t.pauseStart=null;
   render();toast('Resumed','#0BB5C2');
+}
+function stopTaskAt(i){
+  if(i<0||i>=tasks.length) return;
+  var t=tasks[i];
+  if(t.end) return;
+  if(t.paused){
+    // Just end it from paused state
+    t.end=new Date(t.pauseStart||new Date());
+    t.paused=false;t.pauseStart=null;
+  } else {
+    t.end=new Date();
+  }
+  render();
+  // If this was the last task, show stop sheet
+  if(i===tasks.length-1){
+    autoSave();showOv('ov-stop');
+  }
+  toast('Stopped','#FF4455');
 }
 function stopTask(){
   if(!tasks.length) return;
