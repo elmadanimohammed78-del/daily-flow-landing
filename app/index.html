@@ -519,10 +519,14 @@ setInterval(tick,1000);
 // Robust timer — survives browser throttling and tab switches
 function updateRunningTimer(){
   if(!tasks.length) return;
-  var last=tasks[tasks.length-1];
-  if(last.end||last.paused) return;
+  // Find the currently active task (not ended, not paused — any position)
+  var active=null;
+  for(var i=0;i<tasks.length;i++){
+    if(!tasks[i].end&&!tasks[i].paused){ active=tasks[i]; break; }
+  }
+  if(!active) return;
   var rt=document.querySelector('.run-time');
-  if(rt) rt.textContent=dur(last.start,new Date());
+  if(rt) rt.textContent=dur(active.start,new Date());
   updStats();
 }
 setInterval(updateRunningTimer,500);
@@ -549,9 +553,9 @@ function render(){
 
   tasks.forEach(function(t,i){
     var isLast=i===tasks.length-1;
-    // A task is active if it's the last one and not ended and not paused
-    var isAct=isLast&&!t.end&&!t.paused;
-    // A task is paused if it has no end but is marked paused (can be any position)
+    // Active = no end, not paused (can be ANY position after a resume)
+    var isAct=!t.end&&!t.paused;
+    // Paused = no end but paused flag set
     var isPaus=!t.end&&t.paused;
     var isDone=!!t.end;
     var ci=catInfo(t.cat);
@@ -577,7 +581,7 @@ function render(){
 
     var actions='';
     if(isAct){
-      actions='<div class="cact"><button class="rbtn pause" onclick="event.stopPropagation();pauseTask()" title="Pause"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="1.5" y="0.5" width="3" height="10" rx="1"/><rect x="6.5" y="0.5" width="3" height="10" rx="1"/></svg></button><button class="rbtn stop" onclick="event.stopPropagation();stopTask()" title="Stop"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0.5" y="0.5" width="10" height="10" rx="2"/></svg></button></div>';
+      actions='<div class="cact"><button class="rbtn pause" onclick="event.stopPropagation();pauseTask('+i+')" title="Pause"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="1.5" y="0.5" width="3" height="10" rx="1"/><rect x="6.5" y="0.5" width="3" height="10" rx="1"/></svg></button><button class="rbtn stop" onclick="event.stopPropagation();stopTask('+i+')" title="Stop"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0.5" y="0.5" width="10" height="10" rx="2"/></svg></button></div>';
     } else if(isPaus){
       // Show resume button with the task index so any paused task can be resumed
       actions='<div class="cact"><button class="rbtn resume" onclick="event.stopPropagation();resumeTaskAt('+i+')" title="Resume"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><path d="M2 0.5l8 5-8 5z"/></svg></button><button class="rbtn stop" onclick="event.stopPropagation();stopTaskAt('+i+')" title="Stop"><svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0.5" y="0.5" width="10" height="10" rx="2"/></svg></button></div>';
@@ -680,10 +684,17 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 // PAUSE / RESUME / STOP
-function pauseTask(){
-  if(!tasks.length) return;
-  var t=tasks[tasks.length-1];
-  if(t.end||t.paused) return;
+function pauseTask(idx){
+  // Find the active task — either by index or by scanning
+  var t=null;
+  if(typeof idx==='number'&&idx>=0&&idx<tasks.length){
+    t=tasks[idx];
+  } else {
+    for(var i=0;i<tasks.length;i++){
+      if(!tasks[i].end&&!tasks[i].paused){t=tasks[i];break;}
+    }
+  }
+  if(!t||t.end||t.paused) return;
   t.paused=true;t.pauseStart=new Date();
   render();toast('Paused','#F5A623');
 }
@@ -724,15 +735,31 @@ function stopTaskAt(i){
   }
   toast('Stopped','#FF4455');
 }
-function stopTask(){
-  if(!tasks.length) return;
-  var t=tasks[tasks.length-1];
-  if(t.end) return;
-  if(t.paused) resumeTask();
-  t.end=new Date();
+function stopTask(idx){
+  // Find the active task
+  var t=null; var ti=-1;
+  if(typeof idx==='number'&&idx>=0&&idx<tasks.length){
+    t=tasks[idx]; ti=idx;
+  } else {
+    for(var i=0;i<tasks.length;i++){
+      if(!tasks[i].end&&!tasks[i].paused){t=tasks[i];ti=i;break;}
+    }
+    // If no active task, check for paused
+    if(!t){
+      for(var i=0;i<tasks.length;i++){
+        if(!tasks[i].end){t=tasks[i];ti=i;break;}
+      }
+    }
+  }
+  if(!t||t.end) return;
+  if(t.paused){
+    t.end=new Date(t.pauseStart||new Date());
+    t.paused=false;t.pauseStart=null;
+  } else {
+    t.end=new Date();
+  }
   render();
-  autoSave();
-  showOv('ov-stop');
+  if(ti===tasks.length-1){ autoSave(); showOv('ov-stop'); }
   toast('Stopped','#FF4455');
 }
 
